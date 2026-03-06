@@ -40,7 +40,7 @@ class StockPicker():
     @agent
     def trending_company_finder(self) -> Agent:
         return Agent(config=self.agents_config['trending_company_finder'],
-                     tools=[SerperDevTool()], memory=True)
+                     tools=[SerperDevTool()])
     
     @agent
     def financial_researcher(self) -> Agent:
@@ -50,7 +50,7 @@ class StockPicker():
     @agent
     def stock_picker(self) -> Agent:
         return Agent(config=self.agents_config['stock_picker'], 
-                     tools=[PushNotificationTool()], memory=True)
+                     tools=[PushNotificationTool()])
     
     @task
     def find_trending_companies(self) -> Task:
@@ -81,7 +81,7 @@ class StockPicker():
 
         manager = Agent(
             config=self.agents_config['manager'],
-            allow_delegation=True
+              max_iter=2
         )
             
         return Crew(
@@ -90,36 +90,36 @@ class StockPicker():
             process=Process.hierarchical,
             verbose=True,
             manager_agent=manager,
-            memory=True,
             # Long-term memory for persistent storage across sessions
-            long_term_memory = LongTermMemory(
-                storage=LTMSQLiteStorage(
-                    db_path="./memory/long_term_memory_storage.db"
-                )
-            ),
+            # long_term_memory = LongTermMemory(
+            #     storage=LTMSQLiteStorage(
+            #         db_path="./memory/long_term_memory_storage.db"
+            #     )
+            # ),
+            max_retries=1,
             # Short-term memory for current context using RAG
-            short_term_memory = ShortTermMemory(
-                storage = RAGStorage(
-                        embedder_config={
-                            "provider": "openai",
-                            "config": {
-                                "model": 'text-embedding-3-small'
-                            }
-                        },
-                        type="short_term",
-                        path="./memory/"
-                    )
-                ),            # Entity memory for tracking key information about entities
-            entity_memory = EntityMemory(
-                storage=RAGStorage(
-                    embedder_config={
-                        "provider": "openai",
-                        "config": {
-                            "model": 'text-embedding-3-small'
-                        }
-                    },
-                    type="short_term",
-                    path="./memory/"
-                )
-            ),
+            # short_term_memory = ShortTermMemory(
+            #     storage = RAGStorage(
+            #             embedder_config={
+            #                 "provider": "google",
+            #                 "config": {
+            #                     "model": "models/embedding-001"
+            #                 }
+            #             },
+            #             type="short_term",
+            #             path="./memory/"
+            #         )
+            #     ),            # Entity memory for tracking key information about entities
+            # entity_memory = EntityMemory(
+            #     storage=RAGStorage(
+            #        embedder_config={
+            #             "provider": "google",
+            #             "config": {
+            #                 "model": "models/embedding-001"
+            #             }
+            #         },
+            #         type="short_term",
+            #         path="./memory/"
+            #     )
+            # ),
         )
